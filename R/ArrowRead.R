@@ -427,12 +427,20 @@ getMatrixFromArrow <- function(
   if(!is.null(useSeqnames)){
     seqnames <- seqnames[seqnames %in% useSeqnames]
   }
-  if(!is.null(excludeChr)) {
+  if(length(excludeChr) > 0){
     seqnames <- seqnames[seqnames %ni% excludeChr]
   }
 
   if(length(seqnames) == 0){
     stop("No seqnames available!")
+  }
+
+  #Check that the seqnames that will be used actually exist in the ArrowFiles
+  missing_chr <- .checkEmptyChr(ArrowFile = ArrowFile, seqnames = seqnames)
+    if(!is.null(missing_chr)) {
+    stop("The following seqnames do not have fragment information in ArrowFile ",ArrowFile,":\n",
+      paste(missing_chr_all, collapse = ","),
+      "\nYou can proceed with the analysis by ignoring these seqnames by passing them to the 'excludeChr' parameter.")
   }
 
   featureDF <- featureDF[BiocGenerics::which(featureDF$seqnames %bcin% seqnames), ]

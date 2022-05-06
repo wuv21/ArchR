@@ -1032,6 +1032,22 @@ addPeak2GeneLinks <- function(
 
   ArrowFiles <- getArrowFiles(ArchRProj)
 
+  #Check that the seqnames that will be used actually exist in the ArrowFiles
+  seqnames <- getSeqnames(ArchRProj)
+  if(length(excludeChr) > 0){
+    seqnames <- seqnames[seqnames %ni% excludeChr]
+  }
+  missing_chr_all <- .safelapply(seq_along(ArrowFiles), function(x){
+    missing_chr <- .checkEmptyChr(ArrowFile = ArrowFiles[x], seqnames = seqnames)
+    return(missing_chr)
+  }, threads = threads)
+  missing_chr_all <- unique(unlist(missing_chr_all))
+  if(!is.null(missing_chr_all)) {
+    stop("The following seqnames do not have fragment information in one or more ArrowFiles:\n",
+      paste(missing_chr_all, collapse = ","),
+      "\nYou can proceed with the analysis by ignoring these seqnames by passing them to the 'excludeChr' parameter.")
+  }
+  
   tstart <- Sys.time()
 
   dfAll <- .safelapply(seq_along(ArrowFiles), function(x){
@@ -1062,12 +1078,16 @@ addPeak2GeneLinks <- function(
 
   #Get Peak Set
   peakSet <- getPeakSet(ArchRProj)
-  peakSet <- peakSet[BiocGenerics::which(seqnames(peakSet) %bcni% excludeChr)]
+  if(length(excludeChr) > 0){
+    peakSet <- peakSet[BiocGenerics::which(seqnames(peakSet) %bcni% excludeChr)]
+  }
   .logThis(peakSet, "peakSet", logFile = logFile)
 
   #Gene Info
   geneSet <- .getFeatureDF(ArrowFiles, useMatrix, threads = threads)
-  geneSet <- geneSet[BiocGenerics::which(geneSet$seqnames %bcni% excludeChr),]
+  if(length(excludeChr) > 0){
+    geneSet <- geneSet[BiocGenerics::which(geneSet$seqnames %bcni% excludeChr),]
+  }
   geneStart <- GRanges(geneSet$seqnames, IRanges(geneSet$start, width = 1), name = geneSet$name, idx = geneSet$idx)
   .logThis(geneStart, "geneStart", logFile = logFile)
 

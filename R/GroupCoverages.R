@@ -103,10 +103,27 @@ addGroupCoverages <- function(
   }else{
     if(!is.null(ArchRProj@projectMetadata$GroupCoverages[[groupBy]])){
       if(!force){
-        message("Group Coverages Already Computed Returning Groups, Set force = TRUE to Recompute!")
+        message("Group Coverages Already Computed. Returning Groups, Set force = TRUE to Recompute!")
         return(ArchRProj@projectMetadata$GroupCoverages[[groupBy]])
       }
     }      
+  }
+
+  #Check that the seqnames that will be used actually exist in the ArrowFiles
+  ArrowFiles <- getArrowFiles(ArchRProj = ArchRProj)
+  seqnames <- getSeqnames(ArchRProj)
+  if(length(excludeChr) > 0){
+    seqnames <- seqnames[seqnames %ni% excludeChr]
+  }
+  missing_chr_all <- .safelapply(seq_along(ArrowFiles), function(x){
+    missing_chr <- .checkEmptyChr(ArrowFile = ArrowFiles[x], seqnames = seqnames)
+    return(missing_chr)
+  }, threads = threads)
+  missing_chr_all <- unique(unlist(missing_chr_all))
+  if(!is.null(missing_chr_all)) {
+    stop("The following seqnames do not have fragment information in one or more ArrowFiles:\n",
+      paste(missing_chr_all, collapse = ","),
+      "\nYou can proceed with the analysis by ignoring these seqnames by passing them to the 'excludeChr' parameter.")
   }
 
   #####################################################
