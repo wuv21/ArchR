@@ -560,5 +560,18 @@
 
 }
 
-
+#check if an ArrowFile lacks fragment info on a set a seqnames and return a vector of empty seqnames
+#returns NULL if all seqnames are ok
+.checkEmptyChr <- function(ArrowFile = NULL, seqnames = NULL, threads = getArchRThreads()) {
+  failed_chr <- .safelapply(seq_along(seqnames), function(x){
+    tryCatch({
+      .h5read(ArrowFile, paste0("Fragments/", seqnames[x], "/RGLengths"), method = "fast")
+      return(NULL)
+    },error=function(e){
+      return(seqnames[x])
+    })
+    
+  }, threads = threads)
+  return(unlist(failed_chr))
+}
 
