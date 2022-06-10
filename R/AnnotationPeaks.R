@@ -290,7 +290,7 @@ addPeakAnnotations <- function(
 #' @param force A boolean value indicating whether to force the `peakAnnotation` object indicated by `annoName` to be overwritten if
 #' it already exists in the given `ArchRProject`.
 #' @param logFile The path to a file to be used for logging ArchR output.
-#' @param ... Additional parameters to be passed to `TFBSTools::getMatrixSet` for getting a PWM object.
+#' @param ... Additional parameters to be passed to `TFBSTools::getMatrixSet` for getting a JASPAR PWM object.
 #' @export
 addMotifAnnotations <- function(
   ArchRProj = NULL,
@@ -448,8 +448,10 @@ addMotifAnnotations <- function(
   }else if(tolower(motifSet)=="vierstra"){
     if(tolower(collection)=="individual"){
       url = "https://jeffgranja.s3.amazonaws.com/ArchR/Annotations/Vierstra_Individual_Motifs.rds"
+      message("Using Vierstra v1.0 motifs. See https://www.vierstra.org/resources/motif_clustering for more details.")
     } else if(tolower(collection == "archetype")){
       url = "https://jeffgranja.s3.amazonaws.com/ArchR/Annotations/Vierstra_Archetype_Motifs_v2.1.rds"
+      message("Using Vierstra v2.1beta motifs. See https://resources.altius.org/~jvierstra/projects/motif-clustering-v2.1beta/ for more details.")
     } else {
       stop(paste0("Error! collection ", collection, " not recognized for motifSet ",motifSet,
         ". Accepted values are 'individual' and 'archetype'"))

@@ -646,8 +646,10 @@ ArchRBrowserTrack <- function(...){
 #' Blue-colored genes are on the minus strand and red-colored genes are on the plus strand), and "loopTrack" (links between a peak and a gene).
 #' @param sizes A numeric vector containing up to 3 values that indicate the sizes of the individual components passed to `plotSummary`.
 #' The order must be the same as `plotSummary`.
-#' @param features A `GRanges` object containing the "features" to be plotted via the "featureTrack". This should be thought of as a
-#' bed track. i.e. the set of peaks obtained using `getPeakSet(ArchRProj))`. 
+#' @param features A `GRanges` (for a single feature track) or `GRangesList` (for multiple feature tracks) object containing the "features" to
+#' be plotted via the "featureTrack". This should be thought of as a bed track. i.e. the set of peaks obtained using `getPeakSet(ArchRProj))`.
+#' If you provide a `GRangesList`, then each element of that object must be named and this name will be used on the plot.
+#' For example - `GRangesList("peaks" = peak_gr, "other" = other_gr)`.
 #' @param loops A `GRanges` object containing the "loops" to be plotted via the "loopTrack".
 #' This `GRanges` object start represents the center position of one loop anchor and the end represents the center position of another loop anchor. 
 #' A "loopTrack" draws an arc between two genomic regions that show some type of interaction. This type of track can be used 
@@ -1042,7 +1044,7 @@ plotBrowserTrack <- function(
             margin = margin(0,0.35,0,0.35, "cm")),
             strip.text.y = element_text(angle = 0),
           strip.background = element_rect(color="black")) +
-    guides(fill = FALSE, colour = FALSE) + ggtitle(title)
+    guides(fill = "none", colour = "none") + ggtitle(title)
 
   p
 
@@ -1344,7 +1346,7 @@ plotBrowserTrack <- function(
       theme(axis.title.x=element_blank(), axis.text.x=element_blank(),axis.ticks.x=element_blank()) +
       theme(axis.title.y=element_blank(), axis.text.y=element_blank(),axis.ticks.y=element_blank()) +
       theme(legend.text = element_text(size = baseSize), strip.text.y = element_text(size = facetbaseSize, angle = 0)) +
-      guides(fill = guide_legend(override.aes = list(colour = NA, shape = "c", size=3)), color = FALSE) + 
+      guides(fill = guide_legend(override.aes = list(colour = NA, shape = "c", size=3)), color = "none") + 
       theme(legend.position="bottom") +
       theme(legend.title=element_text(size=5), legend.text=element_text(size=7),
         legend.key.size = unit(0.75,"line"), legend.background = element_rect(color =NA), strip.background = element_blank())
@@ -1424,11 +1426,24 @@ plotBrowserTrack <- function(
       featureList <- features
       hideY <- FALSE
     }
+
+    #make sure all elements in featureList have a name for plot display
+    for(i in seq_along(featureList)){
+      if(is.null(names(featureList)[i]) || is.na(names(featureList)[i]) || nchar(names(featureList)[i]) == 0) {
+        message("Warning! Object ",i," in your GRangesList (features) is not named. Generic numbering will be used.")
+        names(featureList)[i] <- as.character(i)
+      }
+    }
+
     featureList <- featureList[rev(seq_along(featureList))]
 
     featureO <- lapply(seq_along(featureList), function(x){
       featurex <- featureList[[x]]
       namex <- names(featureList)[x]
+      if(is.null(namex) || namex == "") {
+        message("Warning! Object ",x," in your GRangesList (features) is not named. Generic numbering will be used.")
+        namex <- as.character(x)
+      }
       mcols(featurex) <- NULL
       sub <- subsetByOverlaps(featurex, region, ignore.strand = TRUE)
       if(length(sub) > 0){
@@ -1460,7 +1475,7 @@ plotBrowserTrack <- function(
       scale_color_manual(values = pal) +
       theme(legend.text = element_text(size = baseSize)) + 
       theme_ArchR(baseSize = baseSize, baseLineSize = borderWidth, baseRectSize = borderWidth) +
-      guides(color = FALSE, fill = FALSE) + theme(strip.text.y = element_text(size = facetbaseSize, angle = 0), strip.background = element_blank())
+      guides(color = "none", fill = "none") + theme(strip.text.y = element_text(size = facetbaseSize, angle = 0), strip.background = element_blank())
 
   }else{
 
@@ -1780,7 +1795,7 @@ plotBrowserTrack <- function(
               margin = margin(0,0.35,0,0.35, "cm")),
               strip.text.y = element_text(angle = 0),
             strip.background = element_rect(color="black")) +
-      guides(fill = FALSE, colour = FALSE) + ggtitle(title)
+      guides(fill = "none", colour = "none") + ggtitle(title)
 
     p
 
@@ -1869,7 +1884,7 @@ plotBrowserTrack <- function(
       pal = pal
     ) + 
     facet_wrap(x~., ncol=1,scales="free_y",strip.position="right") +
-    guides(fill = FALSE, colour = FALSE) +
+    guides(fill = "none", colour = "none") +
     theme_ArchR(baseSize = baseSize,
               baseRectSize = borderWidth,
               baseLineSize = tickWidth,

@@ -335,7 +335,8 @@ getFootprints <- function(
 #' @param smoothWindow The size in basepairs of the sliding window to be used for smoothing of the footprint signal.
 #' @param baseSize A numeric specifying the baseSize of font in the plots.
 #' @param plot A boolean value indicating whether or not the footprints should be plotted (`TRUE`) or returned as grob objects (`FALSE`).
-#' @param ArchRProj An `ArchRProject` object to be used for plotting directory in `getOutputDirectory`.
+#' @param ArchRProj An `ArchRProject` object to be used for plotting directory in `getOutputDirectory`. If no `ArchRProj` is supplied,
+#' then plots will be stored in a directory called "Plots" in the current working directory.
 #' @param plotName A string indicating the name/prefix of the file to be used for output plots.
 #' @param height The height in inches to be used for the output PDF file.
 #' @param width The width in inches to be used for the output PDF file.
@@ -578,8 +579,8 @@ plotFootprints <- function(
         ylim = c(quantile(plotFootDF$mean, 0.0001), 1.15*quantile(smoothFoot, 0.999)), 
         xlim = c(min(plotFootDF$x),max(plotFootDF$x))
       ) + theme_ArchR(baseSize = baseSize) + ggtitle(name) +
-      guides(fill = FALSE) + 
-      guides(color = FALSE) + ylab(paste0(title,"Normalized Insertions"))
+      guides(fill = "none") + 
+      guides(color = "none") + ylab(paste0(title,"Normalized Insertions"))
       #removed ggrepel due to incompatibility with coord_cartesian - see https://github.com/GreenleafLab/ArchR/issues/493#issuecomment-870012873
       #ggrepel::geom_label_repel(data = plotMax, aes(label = group), size = 3, xlim = c(75, NA))
 
