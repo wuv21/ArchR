@@ -16,6 +16,7 @@ plotMarkerHeatmap(
   pal = NULL,
   binaryClusterRows = TRUE,
   clusterCols = TRUE,
+  subsetMarkers = NULL,
   labelMarkers = NULL,
   nLabel = 15,
   nPrint = 15,
@@ -50,6 +51,10 @@ rownames from \code{seMarker} to be excluded from the heatmap.}
 \item{binaryClusterRows}{A boolean value that indicates whether a binary sorting algorithm should be used for fast clustering of heatmap rows.}
 
 \item{clusterCols}{A boolean value that indicates whether the columns of the marker heatmap should be clustered.}
+
+\item{subsetMarkers}{A vector of rownames from seMarker to use for subsetting of seMarker to only plot specific features on the heatmap.
+Note that these rownames are expected to be integers that come from \code{rownames(rowData(seMarker))}. If this parameter is used for
+subsetting, then the values provided to \code{cutOff} are effectively ignored.}
 
 \item{labelMarkers}{A character vector listing the \code{rownames} of \code{seMarker} that should be labeled on the side of the heatmap.}
 
